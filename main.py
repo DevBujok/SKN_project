@@ -1,9 +1,5 @@
-from math import isnan
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from numpy.ma.extras import column_stack
-from sklearn.datasets import load_breast_cancer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
@@ -23,7 +19,6 @@ from sklearn.model_selection import train_test_split
 
 
 data = pd.read_csv('heart.csv')
-
 
 # potem te dane trzeba bedzie jakos odkodowac
 for i in data.columns:
