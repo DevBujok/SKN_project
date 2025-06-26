@@ -8,6 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib
 
+from trained_models.save_model import ModelHandler
 
 # Można by było zrobić jescze coś takiego, ze on mowi, za ile lat wystąpi jakaś choroba z jakim prawdopodobienstwem
 
@@ -34,19 +35,23 @@ for i in data.columns:
         uniqueValues = data[i].unique() #te wartości należy zmapowac na inty
         data[i] = labelEncoder.fit_transform(data[i])
 
-dataCorrelation = data.corr()
-print(dataCorrelation.to_clipboard())
-sns.heatmap(dataCorrelation[['HeartDisease']].sort_values('HeartDisease', ascending=False), annot=True)
-plt.show()
+# dataCorrelation = data.corr()
+# print(dataCorrelation.to_clipboard())
+# sns.heatmap(dataCorrelation[['HeartDisease']].sort_values('HeartDisease', ascending=False), annot=True)
+# plt.show()
 
 X = data.drop(['HeartDisease', 'RestingBP', 'RestingECG'], axis=1)
 Y = data['HeartDisease']
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
 
-model = LogisticRegression(max_iter=10000)
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
-print(classification_report(y_test, y_pred))
-print(y_pred)
-joblib.dump(model, './trained_models/logistic_regression_model.pkl')
+# model = LogisticRegression(max_iter=10000)
+# model.fit(X_train, y_train)
+# y_pred = model.predict(X_test)
+# print(classification_report(y_test, y_pred))
+# print(y_pred)
+# joblib.dump(model, './trained_models/logistic_regression_model.pkl')
+
+modelHandler = ModelHandler()
+
+modelHandler._add_to_the_json("test", "./elo/trelo.csv", {"s":3, "f":4})

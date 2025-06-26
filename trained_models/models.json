@@ -1,0 +1,10 @@
+[
+  {
+    "name": "test",
+    "path": "./elo/trelo.csv",
+    "metrics": {
+      "s": 3,
+      "f": 4
+    }
+  }
+]
