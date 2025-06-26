@@ -4,6 +4,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 # Można by było zrobić jescze coś takiego, ze on mowi, za ile lat wystąpi jakaś choroba z jakim prawdopodobienstwem
 
@@ -17,7 +20,8 @@ from sklearn.preprocessing import LabelEncoder
 
 # Przetwarzanie wstępne danych:
 #     Usunięcie duplikatów - dane nie maja duplikatow
-#     Zamiana enum -> liczba - to można jakoś sprytnie zrobic po indexach unikalnych
+#     label encoder
+#     usuniecie cech o niskiej korelacji
 
 
 data = pd.read_csv('heart.csv')
@@ -27,19 +31,19 @@ for i in data.columns:
     # zmieniac tylko te ktore sa nieliczbowe
     if not isinstance(data[i].iloc[0], (np.float64, np.int64)):
         uniqueValues = data[i].unique() #te wartości należy zmapowac na inty
-        # mapDict = {}
-
-        # for j, uniqueVal in enumerate(uniqueValues):
-        #     mapDict[uniqueVal] = j
-
         data[i] = labelEncoder.fit_transform(data[i])
 
-X = data.drop('HeartDisease', axis=1)
+dataCorrelation = data.corr()
+print(dataCorrelation.to_clipboard())
+sns.heatmap(dataCorrelation[['HeartDisease']].sort_values('HeartDisease', ascending=False), annot=True)
+plt.show()
+
+X = data.drop(['HeartDisease', 'RestingBP', 'RestingECG'], axis=1)
 Y = data['HeartDisease']
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
 
 model = LogisticRegression(max_iter=10000)
 model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
-print(classification_report(y_test, y_pred))
+y_pred = model.predict_proba(X_test)
+# print(classification_report(y_test, y_pred))
