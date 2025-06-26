@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import seaborn as sns
 import matplotlib.pyplot as plt
+import joblib
 
 
 # Można by było zrobić jescze coś takiego, ze on mowi, za ile lat wystąpi jakaś choroba z jakim prawdopodobienstwem
@@ -47,3 +48,5 @@ model = LogisticRegression(max_iter=10000)
 model.fit(X_train, y_train)
 y_pred = model.predict_proba(X_test)
 # print(classification_report(y_test, y_pred))
+print(y_pred)
+joblib.dump(model, 'logistic_model.pkl')
