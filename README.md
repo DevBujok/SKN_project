@@ -39,16 +39,15 @@ GitHub: [DevBujok/SKN_project](https://github.com/DevBujok/SKN_project)
 
 ## Folder Structure (simplified)
 
+<pre>
 SKN_project/
-├── trained_models/ # .pkl files and model metadata (JSON)
-├── main.py # main execution script
-├── app/ # Django frontend (planned)
-├── notebooks/ # data analysis and experiments
+├── trained_models/       # .pkl files and model metadata (JSON)
+├── main.py               # main execution script
+├── app/                  # Django frontend (planned)
+├── notebooks/            # data analysis and experiments
 └── README.md
+</pre>
 
-csharp
-Kopiuj
-Edytuj
 
 ## Status
 
