@@ -4,59 +4,28 @@
     "path": "./trained_models/logistic_regression",
     "metrics": {
       "0": {
-        "precision": 0.8255813953488372,
-        "recall": 0.8554216867469879,
-        "f1-score": 0.8402366863905325,
-        "support": 83.0
+        "precision": 0.9024390243902439,
+        "recall": 0.7628865979381443,
+        "f1-score": 0.8268156424581006,
+        "support": 97.0
       },
       "1": {
-        "precision": 0.8775510204081632,
-        "recall": 0.8514851485148515,
-        "f1-score": 0.864321608040201,
-        "support": 101.0
+        "precision": 0.7745098039215687,
+        "recall": 0.9080459770114943,
+        "f1-score": 0.8359788359788359,
+        "support": 87.0
       },
-      "accuracy": 0.8532608695652174,
+      "accuracy": 0.8315217391304348,
       "macro avg": {
-        "precision": 0.8515662078785002,
-        "recall": 0.8534534176309196,
-        "f1-score": 0.8522791472153668,
+        "precision": 0.8384744141559063,
+        "recall": 0.8354662874748193,
+        "f1-score": 0.8313972392184683,
         "support": 184.0
       },
       "weighted avg": {
-        "precision": 0.854108200408576,
-        "recall": 0.8532608695652174,
-        "f1-score": 0.8534572140351875,
-        "support": 184.0
-      }
-    }
-  },
-  {
-    "name": "logistic_regressioneee",
-    "path": "./trained_models/logistic_regressioneee",
-    "metrics": {
-      "0": {
-        "precision": 0.8705882352941177,
-        "recall": 0.8222222222222222,
-        "f1-score": 0.8457142857142858,
-        "support": 90.0
-      },
-      "1": {
-        "precision": 0.8383838383838383,
-        "recall": 0.8829787234042553,
-        "f1-score": 0.8601036269430051,
-        "support": 94.0
-      },
-      "accuracy": 0.8532608695652174,
-      "macro avg": {
-        "precision": 0.854486036838978,
-        "recall": 0.8526004728132388,
-        "f1-score": 0.8529089563286454,
-        "support": 184.0
-      },
-      "weighted avg": {
-        "precision": 0.8541359890464749,
-        "recall": 0.8532608695652174,
-        "f1-score": 0.8530653622115661,
+        "precision": 0.8419507516686421,
+        "recall": 0.8315217391304348,
+        "f1-score": 0.8311482393945352,
         "support": 184.0
       }
     }

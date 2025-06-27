@@ -56,7 +56,8 @@ class ModelHandler:
         # joblib.dump(model, './trained_models/logistic_regression_model.pkl')
         joblib.dump(model, f"{model_path}/{modelName}.pkl")
 
-    def _delete_folder(self, modelName):
+    @staticmethod
+    def _delete_folder(modelName):
         path_to_delete = f"{modelsFolder}/{modelName}"
 
         if path_to_delete.startswith(modelsFolder):

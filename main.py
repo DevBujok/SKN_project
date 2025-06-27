@@ -54,5 +54,5 @@ metrics = classification_report(y_test, y_pred, output_dict=True)
 
 modelHandler = ModelHandler()
 
-# modelHandler._add_to_the_json("test", "./elo/trelo.csv", {"s":3, "f":4})
-modelHandler.add_model(model, "logistic_regressioneee", metrics)
+modelHandler.add_model(model, "logistic_regression", metrics)
+# modelHandler.delete_model("logistic_regression")
