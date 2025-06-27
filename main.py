@@ -45,13 +45,14 @@ Y = data['HeartDisease']
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
 
-# model = LogisticRegression(max_iter=10000)
-# model.fit(X_train, y_train)®®
-# y_pred = model.predict(X_test)
-# print(classification_report(y_test, y_pred))
+model = LogisticRegression(max_iter=10000)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+metrics = classification_report(y_test, y_pred, output_dict=True)
 # print(y_pred)
-# joblib.dump(model, './trained_models/logistic_regression_model.pkl')
+
 
 modelHandler = ModelHandler()
 
-modelHandler._add_to_the_json("test", "./elo/trelo.csv", {"s":3, "f":4})
+# modelHandler._add_to_the_json("test", "./elo/trelo.csv", {"s":3, "f":4})
+modelHandler.add_model(model, "logistic_regressioneee", metrics)

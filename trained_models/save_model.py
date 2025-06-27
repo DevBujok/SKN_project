@@ -1,9 +1,7 @@
 #Klasa pomocnicza do zapisywania modeli
 #przyjmuje: nazwa modelu, model
 #działanie - na podstawie przesłanych danych tworzy folder i dodaje tam pkl i dane o wytrenowanym modelu do jsona
-import json
-import os
-import shutil
+import json, joblib, os, shutil
 modelsFolder = "./trained_models"
 modelsInfoURL = f'{modelsFolder}/models.json'
 
@@ -48,11 +46,15 @@ class ModelHandler:
             json.dump(models, f, indent=2)
         print("Zapisano do pliku.")
 
-    @staticmethod
-    def add_model(model, modelName):
+    def add_model(self, model, modelName, metrics):
+        #dodanie do jsona
+        model_path = f"{modelsFolder}/{modelName}"
+        self._add_to_the_json(modelName, model_path, metrics)
+
         #zapisz model
-        #zaktualizuj listę
-        pass
+        os.makedirs(model_path, exist_ok=True)
+        # joblib.dump(model, './trained_models/logistic_regression_model.pkl')
+        joblib.dump(model, f"{model_path}/{modelName}.pkl")
 
     def _delete_folder(self, modelName):
         path_to_delete = f"{modelsFolder}/{modelName}"
