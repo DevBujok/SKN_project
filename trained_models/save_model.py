@@ -2,7 +2,10 @@
 #przyjmuje: nazwa modelu, model
 #działanie - na podstawie przesłanych danych tworzy folder i dodaje tam pkl i dane o wytrenowanym modelu do jsona
 import json
-modelsInfoURL = './trained_models/models.json'
+import os
+import shutil
+modelsFolder = "./trained_models"
+modelsInfoURL = f'{modelsFolder}/models.json'
 
 class ModelHandler:
     def _get_models_from_json(self):
@@ -51,9 +54,21 @@ class ModelHandler:
         #zaktualizuj listę
         pass
 
+    def _delete_folder(self, modelName):
+        path_to_delete = f"{modelsFolder}/{modelName}"
+
+        if path_to_delete.startswith(modelsFolder):
+            print(f"path: {path_to_delete}")
+            shutil.rmtree(path_to_delete, ignore_errors=True)
+        else:
+            raise PermissionError("Ścieżka poza dozwolonym katalogiem")
+
     def delete_model(self, modelName):
         if self._model_exists(modelName):
             self._delete_from_json(modelName)
+            self._delete_folder(modelName)
+            #dodatkowa funkcja do sprawdzenia czy folder o takiej nazwie istnieje
+
         else:
             print("Model o podanej nazwie nie istnieje.")
         #usun model
