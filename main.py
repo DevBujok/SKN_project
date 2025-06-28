@@ -8,7 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib
 
-from trained_models.save_model import ModelHandler
+from trained_models.model_handler import ModelHandler
 
 # Można by było zrobić jescze coś takiego, ze on mowi, za ile lat wystąpi jakaś choroba z jakim prawdopodobienstwem
 
@@ -27,6 +27,7 @@ from trained_models.save_model import ModelHandler
 
 
 data = pd.read_csv('heart.csv')
+
 labelEncoder = LabelEncoder()
 # potem te dane trzeba bedzie jakos odkodowac
 for i in data.columns:
