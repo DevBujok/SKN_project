@@ -60,5 +60,67 @@
         "support": 184.0
       }
     }
+  },
+  {
+    "name": "naive_bayes",
+    "path": "../trained_models/naive_bayes",
+    "metrics": {
+      "0": {
+        "precision": 0.8765432098765432,
+        "recall": 0.797752808988764,
+        "f1-score": 0.8352941176470589,
+        "support": 89.0
+      },
+      "1": {
+        "precision": 0.8252427184466019,
+        "recall": 0.8947368421052632,
+        "f1-score": 0.8585858585858586,
+        "support": 95.0
+      },
+      "accuracy": 0.8478260869565217,
+      "macro avg": {
+        "precision": 0.8508929641615726,
+        "recall": 0.8462448255470136,
+        "f1-score": 0.8469399881164588,
+        "support": 184.0
+      },
+      "weighted avg": {
+        "precision": 0.8500565431056496,
+        "recall": 0.8478260869565217,
+        "f1-score": 0.8473197447622,
+        "support": 184.0
+      }
+    }
+  },
+  {
+    "name": "naive_bayes_prescaler",
+    "path": "../trained_models/naive_bayes_prescaler",
+    "metrics": {
+      "0": {
+        "precision": 0.7710843373493976,
+        "recall": 0.7901234567901234,
+        "f1-score": 0.7804878048780488,
+        "support": 81.0
+      },
+      "1": {
+        "precision": 0.8316831683168316,
+        "recall": 0.8155339805825242,
+        "f1-score": 0.8235294117647058,
+        "support": 103.0
+      },
+      "accuracy": 0.8043478260869565,
+      "macro avg": {
+        "precision": 0.8013837528331147,
+        "recall": 0.8028287186863239,
+        "f1-score": 0.8020086083213773,
+        "support": 184.0
+      },
+      "weighted avg": {
+        "precision": 0.8050065090322548,
+        "recall": 0.8043478260869565,
+        "f1-score": 0.8045817478635143,
+        "support": 184.0
+      }
+    }
   }
 ]

@@ -2,7 +2,7 @@
 #przyjmuje: nazwa modelu, model
 #działanie - na podstawie przesłanych danych tworzy folder i dodaje tam pkl i dane o wytrenowanym modelu do jsona
 import json, joblib, os, shutil
-modelsFolder = "./trained_models"
+modelsFolder = "../trained_models"
 modelsInfoURL = f'{modelsFolder}/models.json'
 
 class ModelHandler:
