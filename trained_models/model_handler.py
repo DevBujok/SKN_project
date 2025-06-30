@@ -68,7 +68,7 @@ class ModelHandler:
             json.dump(models, f, indent=2)
         print("Zapisano do pliku.")
 
-    def add_model(self, model, modelName, metrics):
+    def add_model(self, model, modelName,metrics, labelEncoder, prescaler = None):
         """
         Metoda do dodawania modelu do jsona
         :param model:
@@ -83,6 +83,9 @@ class ModelHandler:
         #zapisz model
         os.makedirs(model_path, exist_ok=True) #wywolanie tego zapewnia ze folder istnieje
         joblib.dump(model, f"{model_path}/{modelName}.pkl") #dump modelu
+        joblib.dump(labelEncoder, f"{model_path}/{modelName}_label_encoder.pkl")
+        if prescaler is not None:
+            joblib.dump(prescaler, f"{model_path}/{modelName}_prescaler.pkl")
 
     @staticmethod
     def _delete_folder(modelName):
