@@ -4,6 +4,7 @@
 import json, joblib, os, shutil
 from pathlib import Path
 
+#sciezki robione jako absolutne bo na roznych systemach roznie te sciezki sie wywoluja
 modelsFolder = Path(__file__).resolve().parent
 modelsInfoURL = modelsFolder / "models.json"
 print(modelsInfoURL)
@@ -64,7 +65,6 @@ class ModelHandler:
 
         models.append({ #dodanie zaktualizowanego modelu
             "name": modelName,
-            "path": str(modelPath),
             "metrics": metrics
         })
 
@@ -74,7 +74,7 @@ class ModelHandler:
 
     def add_model(self, model, modelName,metrics, labelEncoder, prescaler = None):
         """
-        Metoda do dodawania modelu do jsona
+        Metoda do dodania modelu
         :param model:
         :param modelName:
         :param metrics:

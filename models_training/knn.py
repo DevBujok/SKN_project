@@ -23,18 +23,19 @@ for i in data.columns:
         columns_to_scale.append(i)
 columns_to_scale.remove("HeartDisease")
 
-# data[columns_to_scale] = scaler.fit_transform(data[columns_to_scale])
+#knn wrazliwe na skalowanie
+data[columns_to_scale] = scaler.fit_transform(data[columns_to_scale])
 
 X = data.drop(['HeartDisease', 'RestingBP', 'RestingECG'], axis=1)
 Y = data['HeartDisease']
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
 
-model = KNeighborsClassifier(n_neighbors=10)
+model = KNeighborsClassifier(n_neighbors=5)
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 metrics = classification_report(y_test, y_pred, output_dict=True)
 
 modelHandler = ModelHandler()
 
-modelHandler.add_model(model, "knn_10", metrics, labelEncoder)
+modelHandler.add_model(model, "knn_5", metrics, labelEncoder, scaler)
