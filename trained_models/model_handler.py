@@ -2,8 +2,11 @@
 #przyjmuje: nazwa modelu, model
 #działanie - na podstawie przesłanych danych tworzy folder i dodaje tam pkl i dane o wytrenowanym modelu do jsona
 import json, joblib, os, shutil
-modelsFolder = "./trained_models"
-modelsInfoURL = f'{modelsFolder}/models.json'
+from pathlib import Path
+
+modelsFolder = Path(__file__).resolve().parent
+modelsInfoURL = modelsFolder / "models.json"
+print(modelsInfoURL)
 
 class ModelHandler:
 
@@ -61,7 +64,7 @@ class ModelHandler:
 
         models.append({ #dodanie zaktualizowanego modelu
             "name": modelName,
-            "path": modelPath,
+            "path": str(modelPath),
             "metrics": metrics
         })
 
@@ -78,15 +81,15 @@ class ModelHandler:
         :return:
         """
         #dodanie do jsona
-        model_path = f"{modelsFolder}/{modelName}" #sciezka do nowego modelu
+        model_path = modelsFolder / f"{modelName}" #sciezka do nowego modelu
         self._add_to_the_json(modelName, model_path, metrics) #dodanie info do jsona
 
         #zapisz model
         os.makedirs(model_path, exist_ok=True) #wywolanie tego zapewnia ze folder istnieje
-        joblib.dump(model, f"{model_path}/{modelName}.pkl") #dump modelu
-        joblib.dump(labelEncoder, f"{model_path}/{modelName}_label_encoder.pkl")
+        joblib.dump(model, model_path / f"{modelName}.pkl") #dump modelu
+        joblib.dump(labelEncoder, model_path / f"{modelName}_label_encoder.pkl")
         if prescaler is not None:
-            joblib.dump(prescaler, f"{model_path}/{modelName}_prescaler.pkl")
+            joblib.dump(prescaler, model_path/ f"{modelName}_prescaler.pkl")
 
     @staticmethod
     def _delete_folder(modelName):
@@ -95,9 +98,9 @@ class ModelHandler:
         :param modelName:
         :return:
         """
-        path_to_delete = f"{modelsFolder}/{modelName}" #sciezka do usuniecia
+        path_to_delete = modelsFolder / f"{modelName}" #sciezka do usuniecia
 
-        if path_to_delete.startswith(modelsFolder): #dodatkowe sprawdzenie czy sciezka znajduje sie w katalogu domowym,
+        if path_to_delete.resolve().is_relative_to(modelsFolder.resolve()): #dodatkowe sprawdzenie czy sciezka znajduje sie w katalogu domowym,
             # bo ona moze usuwac wszystko globalnie
             shutil.rmtree(path_to_delete, ignore_errors=True) #usuniecie
         else:

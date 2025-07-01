@@ -1,124 +1,31 @@
 [
   {
-    "name": "logistic_regression",
-    "path": "./trained_models/logistic_regression",
+    "name": "knn_10",
+    "path": "D:\\Users\\devbu\\Desktop\\Projekty\\Python\\SKN_project\\trained_models\\knn_10",
     "metrics": {
       "0": {
-        "precision": 0.8333333333333334,
-        "recall": 0.875,
-        "f1-score": 0.8536585365853658,
+        "precision": 0.6494845360824743,
+        "recall": 0.7875,
+        "f1-score": 0.711864406779661,
         "support": 80.0
       },
       "1": {
-        "precision": 0.9,
-        "recall": 0.8653846153846154,
-        "f1-score": 0.8823529411764706,
+        "precision": 0.8045977011494253,
+        "recall": 0.6730769230769231,
+        "f1-score": 0.7329842931937173,
         "support": 104.0
       },
-      "accuracy": 0.8695652173913043,
+      "accuracy": 0.7228260869565217,
       "macro avg": {
-        "precision": 0.8666666666666667,
-        "recall": 0.8701923076923077,
-        "f1-score": 0.8680057388809181,
+        "precision": 0.7270411186159498,
+        "recall": 0.7302884615384615,
+        "f1-score": 0.7224243499866891,
         "support": 184.0
       },
       "weighted avg": {
-        "precision": 0.8710144927536233,
-        "recall": 0.8695652173913043,
-        "f1-score": 0.8698771130933816,
-        "support": 184.0
-      }
-    }
-  },
-  {
-    "name": "naive_bayes",
-    "path": "../trained_models/naive_bayes",
-    "metrics": {
-      "0": {
-        "precision": 0.8765432098765432,
-        "recall": 0.797752808988764,
-        "f1-score": 0.8352941176470589,
-        "support": 89.0
-      },
-      "1": {
-        "precision": 0.8252427184466019,
-        "recall": 0.8947368421052632,
-        "f1-score": 0.8585858585858586,
-        "support": 95.0
-      },
-      "accuracy": 0.8478260869565217,
-      "macro avg": {
-        "precision": 0.8508929641615726,
-        "recall": 0.8462448255470136,
-        "f1-score": 0.8469399881164588,
-        "support": 184.0
-      },
-      "weighted avg": {
-        "precision": 0.8500565431056496,
-        "recall": 0.8478260869565217,
-        "f1-score": 0.8473197447622,
-        "support": 184.0
-      }
-    }
-  },
-  {
-    "name": "naive_bayes_prescaler",
-    "path": "../trained_models/naive_bayes_prescaler",
-    "metrics": {
-      "0": {
-        "precision": 0.7710843373493976,
-        "recall": 0.7901234567901234,
-        "f1-score": 0.7804878048780488,
-        "support": 81.0
-      },
-      "1": {
-        "precision": 0.8316831683168316,
-        "recall": 0.8155339805825242,
-        "f1-score": 0.8235294117647058,
-        "support": 103.0
-      },
-      "accuracy": 0.8043478260869565,
-      "macro avg": {
-        "precision": 0.8013837528331147,
-        "recall": 0.8028287186863239,
-        "f1-score": 0.8020086083213773,
-        "support": 184.0
-      },
-      "weighted avg": {
-        "precision": 0.8050065090322548,
-        "recall": 0.8043478260869565,
-        "f1-score": 0.8045817478635143,
-        "support": 184.0
-      }
-    }
-  },
-  {
-    "name": "logistic_regression_prescaler",
-    "path": "./trained_models/logistic_regression_prescaler",
-    "metrics": {
-      "0": {
-        "precision": 0.8452380952380952,
-        "recall": 0.8160919540229885,
-        "f1-score": 0.8304093567251462,
-        "support": 87.0
-      },
-      "1": {
-        "precision": 0.84,
-        "recall": 0.865979381443299,
-        "f1-score": 0.8527918781725888,
-        "support": 97.0
-      },
-      "accuracy": 0.842391304347826,
-      "macro avg": {
-        "precision": 0.8426190476190476,
-        "recall": 0.8410356677331438,
-        "f1-score": 0.8416006174488675,
-        "support": 184.0
-      },
-      "weighted avg": {
-        "precision": 0.8424767080745342,
-        "recall": 0.842391304347826,
-        "f1-score": 0.8422088381403741,
+        "precision": 0.737157194598577,
+        "recall": 0.7228260869565217,
+        "f1-score": 0.723801733883258,
         "support": 184.0
       }
     }
