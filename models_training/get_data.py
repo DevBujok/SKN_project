@@ -7,6 +7,8 @@ from sklearn.metrics import classification_report, roc_curve, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import mutual_info_classif
+from enum import Enum, auto
 
 from trained_models.model_handler import ModelHandler
 
@@ -14,35 +16,70 @@ from trained_models.model_handler import ModelHandler
 
 pd.set_option('display.expand_frame_repr', False) #linika do pokazywania pelnych statystyk bez paginacji
 
-#Analiza data.describe():
-    #Age w zakresie 28-77 - bez błędnych, mean == 50% (mediana) - rownomierny rozkład wokół środka
-    #Resting BP - jest jedna wartość 0 - do usunięcia, nie ma nic pozyzej 250
-    #Cholesterol - ponizej 100 bardzo rzadko spotykane - 172 wiersze z takim - zastanowic sie - wywalic wiersze czy wywalic caly cholesterol
-    # FastingBS - cukier naczczo - znormalizowane do 0-1
-    # MaxHR - max tetno podczas wysiłku - wartosci w normie
-    # Oldpeak - o ile mV spada odcinek ST na EKG - nierealne ze na minusie a są takie wartosci
-
 #Co mozna zrobic dla niepoprawnych danych:
     #Usunąć wiersze
     #Jak jest dużo tych danych to zastąpić na przykład srednia
 
+# Age: age of the patient [years] - zakres 28-27, bez błędnych, mean == 50% (mediana) - rownomierny rozkład wokół środka
+# Sex: sex of the patient [M: Male, F: Female]
+# ChestPainType: chest pain type [TA: Typical Angina, ATA: Atypical Angina, NAP: Non-Anginal Pain, ASY: Asymptomatic]
+# RestingBP: resting blood pressure [mm Hg] - jest jedna wartość 0 - do usunięcia, nie ma nic pozyzej 250
+# Cholesterol: serum cholesterol [mm/dl] -  ponizej 100 bardzo rzadko spotykane - 172 wiersze z zerowym cholesterolem - zastanowic sie - wywalic wiersze czy wywalic caly cholesterol
+# FastingBS: fasting blood sugar [1: if FastingBS > 120 mg/dl, 0: otherwise]
+# RestingECG: resting electrocardiogram results [Normal: Normal, ST: having ST-T wave abnormality (T wave inversions and/or ST elevation or depression of > 0.05 mV), LVH: showing probable or definite left ventricular hypertrophy by Estes' criteria]
+# MaxHR: maximum heart rate achieved [Numeric value between 60 and 202] - wartosci w normie
+# ExerciseAngina: exercise-induced angina [Y: Yes, N: No]
+# Oldpeak: oldpeak = ST [Numeric value measured in depression] - występuja ujemne wartosci i one czasami sa spotykane - chatGPT
+# ST_Slope: the slope of the peak exercise ST segment [Up: upsloping, Flat: flat, Down: downsloping]
+# HeartDisease: output class [1: heart disease, 0: Normal]
 
-#sprawdzic jeszcze outliersy tym:
-#Using median calculations and IQR, outliers are identified and these data points should be removed
-Q1 = df["column_name"].quantile(0.25)
-Q3 = df["column_name"].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1 - 1.5 * IQR
-upper_bound = Q3 + 1.5 * IQR
-df = df[df["column_name"].between(lower_bound, upper_bound)]
+def get_mutual_info_classif(data):
+    """
+    Przyjmuje enkodowane dane!!! Pokazuje, czy dana cecha ma wartość predykcyjną
+    """
+    X = data.drop(columns=["HeartDisease"])  # lub inna nazwa zmiennej celu
+    y = data["HeartDisease"]
 
-def get_data():
+    importances = mutual_info_classif(X.fillna(0), y)
+    ranking = pd.Series(importances, index=X.columns).sort_values(ascending=False)
+    print(ranking)
+
+class EncoderEnum(Enum):
+    LABEL_ENCODER = auto()
+    ONE_HOT_ENCODER = auto()
+
+
+def get_data(encoder: EncoderEnum):
     data = pd.read_csv('../heart.csv')
-    print(data.isnull().sum())
-    # hist(data[["Age"]], bins=100)
-    # plt.show()
+
+    #RestingBP
+    data = data[data["RestingBP"] != 0] #odfiltrowac ta jedna wartosc z RestingBP
+
+    #Cholesterol - z analizy corr i mutual_info_classif wynika ze ta cecha jest znacząca - zastąpić medianą
+    cholesterol_median = data["Cholesterol"].median()
+    data["Cholesterol"] = data["Cholesterol"].replace(0, cholesterol_median) #zastąpienie 0 -> median
+
+    #Enkodowanie i skalowanie danych danych
+    label_encoder = LabelEncoder()
+    scaler = StandardScaler()
+    columns_to_scale = []
+
+    #W zależności od typu klasyfikatora trzeba uzyc innego enkodera
+    # potem te dane trzeba bedzie jakos odkodowac
+    # Aktualnie jest tak ze ten enkoder zapisywany dla kazdych danych osobno
+    for i in data.columns:
+        # zmieniac tylko te ktore sa nieliczbowe
+        if not isinstance(data[i].iloc[0], (np.float64, np.int64)):
+            uniqueValues = data[i].unique() #te wartości należy zmapowac na inty
+            data[i] = label_encoder.fit_transform(data[i])
+        else:
+            columns_to_scale.append(i)
+    columns_to_scale.remove("HeartDisease")
 
 get_data()
+
+#mozna zrobic taki bajer - jakis hash z danych i jak sie zmienia to generuje jeszcze raz
+
 #
 # pass
 # data = pd.read_csv('../heart.csv')
