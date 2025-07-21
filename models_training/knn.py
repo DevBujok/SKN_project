@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from trained_models.model_handler import ModelHandler
 from sklearn.neighbors import KNeighborsClassifier
 
-data = pd.read_csv('../heart.csv')
+data = pd.read_csv('../data_handler/heart.csv')
 
 labelEncoder = LabelEncoder()
 scaler = StandardScaler()

@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 
 from trained_models.model_handler import ModelHandler
 
-data = pd.read_csv('../heart.csv')
+data = pd.read_csv('../data_handler/heart.csv')
 
 labelEncoder = LabelEncoder()
 scaler = StandardScaler()

@@ -25,7 +25,7 @@ from trained_models.model_handler import ModelHandler
 #     usuniecie cech o niskiej korelacji
 
 
-data = pd.read_csv('heart.csv')
+data = pd.read_csv('data_handler/heart.csv')
 
 labelEncoder = LabelEncoder()
 scaler = StandardScaler()

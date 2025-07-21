@@ -1,3 +1,6 @@
+import json
+import os
+
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
@@ -9,6 +12,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import mutual_info_classif
 from enum import Enum, auto
+import hashlib
 
 from trained_models.model_handler import ModelHandler
 
@@ -48,37 +52,82 @@ class EncoderEnum(Enum):
     LABEL_ENCODER = auto()
     ONE_HOT_ENCODER = auto()
 
+def hash_file(filepath):
+    hasher = hashlib.sha256()
+    with open(filepath, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            hasher.update(chunk)
+    return hasher.hexdigest()
 
-def get_data(encoder: EncoderEnum):
-    data = pd.read_csv('../heart.csv')
+def if_file_changed(filepath):
+    with open('data_info.json', 'r') as f:
+        data = json.load(f)
 
-    #RestingBP
-    data = data[data["RestingBP"] != 0] #odfiltrowac ta jedna wartosc z RestingBP
+    if data['data_hash'] != hash_file(filepath):
+        # plik sie zmienil - update hash i return true
+        data['data_hash'] = hash_file(filepath)
+        with open('data_info.json', 'w') as f:
+            json.dump(data, f, indent=2)
+        return True
+    else:
+        #plik sie nie zmienil - return false
+        return False
 
-    #Cholesterol - z analizy corr i mutual_info_classif wynika ze ta cecha jest znacząca - zastąpić medianą
-    cholesterol_median = data["Cholesterol"].median()
-    data["Cholesterol"] = data["Cholesterol"].replace(0, cholesterol_median) #zastąpienie 0 -> median
+def if_file_exists(path: str) -> bool:
+    return os.path.isfile(path)
 
-    #Enkodowanie i skalowanie danych danych
-    label_encoder = LabelEncoder()
-    scaler = StandardScaler()
-    columns_to_scale = []
+def get_data(encoder: EncoderEnum, force_reload: bool = False):
+    #dodac if: jezeli plik sie zmienil albo nie istnieje przetworzony plik
+    #uproszczenie - założenie, że pliki istnieja bo za bardzo sie rozrasta
+    #uproszczenie - za kazdym razem jak plik sie zmieni to one_hot i label robione od nowa
+    if if_file_changed("heart.csv") or force_reload: #jezeli sie plik zmienil
+        data = pd.read_csv('heart.csv')
 
-    #W zależności od typu klasyfikatora trzeba uzyc innego enkodera
-    # potem te dane trzeba bedzie jakos odkodowac
-    # Aktualnie jest tak ze ten enkoder zapisywany dla kazdych danych osobno
-    for i in data.columns:
-        # zmieniac tylko te ktore sa nieliczbowe
-        if not isinstance(data[i].iloc[0], (np.float64, np.int64)):
-            uniqueValues = data[i].unique() #te wartości należy zmapowac na inty
-            data[i] = label_encoder.fit_transform(data[i])
-        else:
-            columns_to_scale.append(i)
-    columns_to_scale.remove("HeartDisease")
+        #### DATA CLEANING #####
 
-get_data()
+        # RestingBP
+        data = data[data["RestingBP"] != 0]  # odfiltrowac ta jedna wartosc z RestingBP
 
-#mozna zrobic taki bajer - jakis hash z danych i jak sie zmienia to generuje jeszcze raz
+        # Cholesterol - z analizy corr i mutual_info_classif wynika ze ta cecha jest znacząca - zastąpić medianą
+        cholesterol_median = data["Cholesterol"].median()
+        data["Cholesterol"] = data["Cholesterol"].replace(0, cholesterol_median)  # zastąpienie 0 -> median
+
+        #### DATA SCALING ####
+        #robione to jest w tym miejscu bo wspolnie encodery nie pokrywaja danych ktore beda skalowane
+        scaler = StandardScaler()
+        columns_to_scale = []
+        for i in data.columns:
+            # zmieniac tylko te ktore sa nieliczbowe
+            if isinstance(data[i].iloc[0], (np.float64, np.int64)):
+                columns_to_scale.append(i)
+
+        columns_to_scale.remove("HeartDisease")
+        data[columns_to_scale] = scaler.fit_transform(data[columns_to_scale])
+
+        #### LABEL_ENCODER #####
+
+        label_encoders = {} #Kazda cecha musi miec swoj encoder
+        data_label_encoder = data.copy() ## bez copy robi sie tylko referencja
+
+        for i in data_label_encoder.columns:
+            # zmieniac tylko te ktore sa nieliczbowe
+            if not isinstance(data_label_encoder[i].iloc[0], (np.float64, np.int64)):
+                label_encoders[i] = LabelEncoder()
+                data_label_encoder[i] = label_encoders[i].fit_transform(data_label_encoder[i])
+            else:
+                columns_to_scale.append(i)
+        columns_to_scale.remove("HeartDisease")
+
+
+    else:
+        #plik sie nie zmienil - zwroc odpowieni
+        pass
+
+
+
+get_data(encoder=EncoderEnum.LABEL_ENCODER, force_reload=True)
+
+#
 
 #
 # pass
