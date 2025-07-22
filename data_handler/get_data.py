@@ -1,6 +1,7 @@
 import json
 import os
 
+import joblib
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
@@ -138,9 +139,16 @@ def get_data(encoder: EncoderEnum, force_reload: bool = False):
         # Połączenie danych
         data_one_hot_encoder = pd.concat([data[numerical_columns], data_one_hot_encoder], axis=1)
 
-        data_one_hot_encoder.to_csv("test.csv", index=False)
-
         #### ZAPIS DO PLIKU ####
+
+        # label_encoder
+        joblib.dump(label_encoders,"./LABEL_ENCODER/label_encoders.pkl")
+        data_label_encoder.to_csv("./LABEL_ENCODER/heart_LABEL_ENCODER.csv", index=False)
+
+        # one_hot_encoder
+        joblib.dump(one_hot_encoder,"./ONE_HOT_ENCODER/one_hot_encoder.pkl")
+        data_one_hot_encoder.to_csv("./ONE_HOT_ENCODER/heart_ONE_HOT_ENCODER.csv", index=False)
+
     else:
         #plik sie nie zmienil - zwroc odpowieni
         pass
