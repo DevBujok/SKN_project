@@ -9,6 +9,7 @@ from sklearn.feature_selection import mutual_info_classif
 from enum import Enum, auto
 import hashlib
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 #Dane bez duplikatów, brak NAN, brak null
 
@@ -54,13 +55,15 @@ def hash_file(filepath):
     return hasher.hexdigest()
 
 def if_file_changed(filepath):
-    with open('data_info.json', 'r') as f:
+    data_info_path = os.path.join(BASE_DIR, 'data_info.json')
+    file_path_abs = os.path.join(BASE_DIR, filepath)
+    with open(data_info_path, 'r') as f:
         data = json.load(f)
 
-    if data['data_hash'] != hash_file(filepath):
+    if data['data_hash'] != hash_file(file_path_abs):
         # plik sie zmienil - update hash i return true
-        data['data_hash'] = hash_file(filepath)
-        with open('data_info.json', 'w') as f:
+        data['data_hash'] = hash_file(file_path_abs)
+        with open(data_info_path, 'w') as f:
             json.dump(data, f, indent=2)
         return True
     else:
@@ -71,7 +74,7 @@ def if_file_exists(path: str) -> bool:
     return os.path.isfile(path)
 
 def generate_data() -> None:
-    data = pd.read_csv('heart.csv')
+    data = pd.read_csv(os.path.join(BASE_DIR, 'heart.csv'))
 
     #### DATA CLEANING #####
 
@@ -81,6 +84,9 @@ def generate_data() -> None:
     # Cholesterol - z analizy corr i mutual_info_classif wynika ze ta cecha jest znacząca - zastąpić medianą
     cholesterol_median = data["Cholesterol"].median()
     data["Cholesterol"] = data["Cholesterol"].replace(0, cholesterol_median)  # zastąpienie 0 -> median
+
+    #Z analizy corr te cechy mają korelacje <0.1 z HeartDisease
+    data.drop(['RestingBP', 'RestingECG'], axis=1, inplace=True)
 
     #### DATA SCALING ####
     # robione to jest w tym miejscu bo wspolnie encodery nie pokrywaja danych ktore beda skalowane
@@ -129,32 +135,55 @@ def generate_data() -> None:
 
     #### ZAPIS DO PLIKU ####
 
-    # label_encoder
-    joblib.dump(label_encoders, "./LABEL_ENCODER/label_encoders.pkl")
-    data_label_encoder.to_csv("./LABEL_ENCODER/heart_LABEL_ENCODER.csv", index=False)
+    os.makedirs(os.path.join(BASE_DIR, "LABEL_ENCODER"), exist_ok=True)
+    joblib.dump(label_encoders, os.path.join(BASE_DIR, "LABEL_ENCODER/label_encoders.pkl"))
+    data_label_encoder.to_csv(os.path.join(BASE_DIR, "LABEL_ENCODER/heart_LABEL_ENCODER.csv"), index=False)
 
-    # one_hot_encoder
-    joblib.dump(one_hot_encoder, "./ONE_HOT_ENCODER/one_hot_encoder.pkl")
-    data_one_hot_encoder.to_csv("./ONE_HOT_ENCODER/heart_ONE_HOT_ENCODER.csv", index=False)
+    os.makedirs(os.path.join(BASE_DIR, "ONE_HOT_ENCODER"), exist_ok=True)
+    joblib.dump(one_hot_encoder, os.path.join(BASE_DIR, "ONE_HOT_ENCODER/one_hot_encoder.pkl"))
+    data_one_hot_encoder.to_csv(os.path.join(BASE_DIR, "ONE_HOT_ENCODER/heart_ONE_HOT_ENCODER.csv"), index=False)
 
 
-def get_data(encoder: EncoderEnum, force_reload: bool = False) -> pd.DataFrame:
+def get_data(encoder: EncoderEnum, force_reload: bool = False) -> tuple[pd.DataFrame, dict | OneHotEncoder]:
     # Jeśli plik się zmienił lub wymuszono ponowne przetworzenie
     if if_file_changed("heart.csv") or force_reload:
-        generate_data() #funkcja zapisuje dane do plikow
+        generate_data()  # Funkcja zapisuje dane i encodery do plików
 
-    # Wczytaj odpowiednie dane w zależności od enkodera
+    # Wczytaj odpowiednie dane i enkoder w zależności od enkodera
     if encoder == EncoderEnum.LABEL_ENCODER:
-        if os.path.exists("./LABEL_ENCODER/heart_LABEL_ENCODER.csv"):
-            return pd.read_csv("./LABEL_ENCODER/heart_LABEL_ENCODER.csv")
-        else:
-            raise FileNotFoundError("Plik heart_LABEL_ENCODER.csv nie istnieje. Ustaw force_reload=True, aby przetworzyć dane od nowa.")
+        label_encoder_data_path = os.path.join(BASE_DIR, "LABEL_ENCODER/heart_LABEL_ENCODER.csv")
+        label_encoders_path = os.path.join(BASE_DIR, "LABEL_ENCODER/label_encoders.pkl")
+
+        # Sprawdź, czy plik danych istnieje
+        if not os.path.exists(label_encoder_data_path):
+            raise FileNotFoundError(
+                f"Plik {label_encoder_data_path} nie istnieje. Ustaw force_reload=True, aby przetworzyć dane od nowa.")
+
+        # Sprawdź, czy plik enkodera istnieje
+        if not os.path.exists(label_encoders_path):
+            raise FileNotFoundError(
+                f"Plik {label_encoders_path} nie istnieje. Ustaw force_reload=True, aby przetworzyć encodery od nowa.")
+
+        # Wczytaj dane i encodery
+        data = pd.read_csv(label_encoder_data_path)
+        label_encoders = joblib.load(label_encoders_path)
+        return data, label_encoders
+
     else:  # ONE_HOT_ENCODER
-        if os.path.exists("./ONE_HOT_ENCODER/heart_ONE_HOT_ENCODER.csv"):
-            return pd.read_csv("./ONE_HOT_ENCODER/heart_ONE_HOT_ENCODER.csv")
-        else:
-            raise FileNotFoundError("Plik heart_ONE_HOT_ENCODER.csv nie istnieje. Ustaw force_reload=True, aby przetworzyć dane od nowa.")
+        one_hot_encoder_data_path = os.path.join(BASE_DIR, "ONE_HOT_ENCODER/heart_ONE_HOT_ENCODER.csv")
+        one_hot_encoders_path = os.path.join(BASE_DIR, "ONE_HOT_ENCODER/one_hot_encoder.pkl")
 
+        # Sprawdź, czy plik danych istnieje
+        if not os.path.exists(one_hot_encoder_data_path):
+            raise FileNotFoundError(
+                f"Plik {one_hot_encoder_data_path} nie istnieje. Ustaw force_reload=True, aby przetworzyć dane od nowa.")
 
-test= get_data(encoder=EncoderEnum.LABEL_ENCODER, force_reload=True)
-print(test.describe())
+        # Sprawdź, czy plik enkodera istnieje
+        if not os.path.exists(one_hot_encoders_path):
+            raise FileNotFoundError(
+                f"Plik {one_hot_encoders_path} nie istnieje. Ustaw force_reload=True, aby przetworzyć encodery od nowa.")
+
+        # Wczytaj dane i enkoder
+        data = pd.read_csv(one_hot_encoder_data_path)
+        one_hot_encoder = joblib.load(one_hot_encoders_path)
+        return data, one_hot_encoder
