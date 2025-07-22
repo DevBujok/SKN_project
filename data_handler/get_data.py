@@ -8,7 +8,7 @@ from matplotlib.pyplot import hist
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, roc_curve, roc_auc_score
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import mutual_info_classif
 from enum import Enum, auto
@@ -104,21 +104,43 @@ def get_data(encoder: EncoderEnum, force_reload: bool = False):
         columns_to_scale.remove("HeartDisease")
         data[columns_to_scale] = scaler.fit_transform(data[columns_to_scale])
 
-        #### LABEL_ENCODER #####
+        #### DATA ENCODING ####
+        data_to_encode = []#wyodrebnienie danych do enkodowania
+        for i in data.columns:
+            # zmieniac tylko te ktore sa nieliczbowe
+            if not isinstance(data[i].iloc[0], (np.float64, np.int64)):
+                data_to_encode.append(i)
 
+
+        #### LABEL_ENCODER #####
         label_encoders = {} #Kazda cecha musi miec swoj encoder
         data_label_encoder = data.copy() ## bez copy robi sie tylko referencja
 
-        for i in data_label_encoder.columns:
-            # zmieniac tylko te ktore sa nieliczbowe
-            if not isinstance(data_label_encoder[i].iloc[0], (np.float64, np.int64)):
+        for i in data_to_encode:
                 label_encoders[i] = LabelEncoder()
                 data_label_encoder[i] = label_encoders[i].fit_transform(data_label_encoder[i])
-            else:
-                columns_to_scale.append(i)
-        columns_to_scale.remove("HeartDisease")
 
+        #### ONE_HOT ENCODER####
+        #Sposob dzialania - bierze kolumny nienumeryczne i rozbija je na podcechy
 
+        one_hot_encoder = OneHotEncoder(sparse_output=False)
+        encoded_data = one_hot_encoder.fit_transform(data[data_to_encode]) #cechy -> podcechy
+
+        #Pobranie nazw nowych kolumn
+        encoded_columns = one_hot_encoder.get_feature_names_out(data_to_encode)
+
+        # połączenie cech i kolumn
+        data_one_hot_encoder = pd.DataFrame(encoded_data, columns=encoded_columns, index=data.index)
+
+        # odfiltrowanie kolumn numerycznych z oryginału
+        numerical_columns = [col for col in data.columns if col not in data_to_encode]
+
+        # Połączenie danych
+        data_one_hot_encoder = pd.concat([data[numerical_columns], data_one_hot_encoder], axis=1)
+
+        data_one_hot_encoder.to_csv("test.csv", index=False)
+
+        #### ZAPIS DO PLIKU ####
     else:
         #plik sie nie zmienil - zwroc odpowieni
         pass
@@ -126,43 +148,3 @@ def get_data(encoder: EncoderEnum, force_reload: bool = False):
 
 
 get_data(encoder=EncoderEnum.LABEL_ENCODER, force_reload=True)
-
-#
-
-#
-# pass
-# data = pd.read_csv('../heart.csv')
-#
-# labelEncoder = LabelEncoder()
-# scaler = StandardScaler()
-# columns_to_scale = []
-# # potem te dane trzeba bedzie jakos odkodowac
-# for i in data.columns:
-#     # zmieniac tylko te ktore sa nieliczbowe
-#     if not isinstance(data[i].iloc[0], (np.float64, np.int64)):
-#         uniqueValues = data[i].unique() #te wartości należy zmapowac na inty
-#         data[i] = labelEncoder.fit_transform(data[i])
-#     else:
-#         columns_to_scale.append(i)
-# columns_to_scale.remove("HeartDisease")
-#
-# # data[columns_to_scale] = scaler.fit_transform(data[columns_to_scale])
-#
-# # dataCorrelation = data.corr()
-# # print(dataCorrelation.to_clipboard())
-# # sns.heatmap(dataCorrelation[['HeartDisease']].sort_values('HeartDisease', ascending=False), annot=True)
-# # plt.show()
-#
-# X = data.drop(['HeartDisease', 'RestingBP', 'RestingECG'], axis=1)
-# Y = data['HeartDisease']
-#
-# X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
-#
-# model = LogisticRegression(max_iter=10000)
-# model.fit(X_train, y_train)
-# y_pred = model.predict(X_test)
-# metrics = classification_report(y_test, y_pred, output_dict=True)
-#
-# modelHandler = ModelHandler()
-#
-# modelHandler.add_model(model, "logistic_regression", metrics, labelEncoder)
