@@ -1,21 +1,14 @@
 import json
 import os
-
 import joblib
 import pandas as pd
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib.pyplot import hist
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, roc_curve, roc_auc_score
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import mutual_info_classif
 from enum import Enum, auto
 import hashlib
 
-from trained_models.model_handler import ModelHandler
 
 #Dane bez duplikatów, brak NAN, brak null
 
@@ -77,82 +70,91 @@ def if_file_changed(filepath):
 def if_file_exists(path: str) -> bool:
     return os.path.isfile(path)
 
-def get_data(encoder: EncoderEnum, force_reload: bool = False):
-    #dodac if: jezeli plik sie zmienil albo nie istnieje przetworzony plik
-    #uproszczenie - założenie, że pliki istnieja bo za bardzo sie rozrasta
-    #uproszczenie - za kazdym razem jak plik sie zmieni to one_hot i label robione od nowa
-    if if_file_changed("heart.csv") or force_reload: #jezeli sie plik zmienil
-        data = pd.read_csv('heart.csv')
+def generate_data() -> None:
+    data = pd.read_csv('heart.csv')
 
-        #### DATA CLEANING #####
+    #### DATA CLEANING #####
 
-        # RestingBP
-        data = data[data["RestingBP"] != 0]  # odfiltrowac ta jedna wartosc z RestingBP
+    # RestingBP
+    data = data[data["RestingBP"] != 0]  # odfiltrowac ta jedna wartosc z RestingBP
 
-        # Cholesterol - z analizy corr i mutual_info_classif wynika ze ta cecha jest znacząca - zastąpić medianą
-        cholesterol_median = data["Cholesterol"].median()
-        data["Cholesterol"] = data["Cholesterol"].replace(0, cholesterol_median)  # zastąpienie 0 -> median
+    # Cholesterol - z analizy corr i mutual_info_classif wynika ze ta cecha jest znacząca - zastąpić medianą
+    cholesterol_median = data["Cholesterol"].median()
+    data["Cholesterol"] = data["Cholesterol"].replace(0, cholesterol_median)  # zastąpienie 0 -> median
 
-        #### DATA SCALING ####
-        #robione to jest w tym miejscu bo wspolnie encodery nie pokrywaja danych ktore beda skalowane
-        scaler = StandardScaler()
-        columns_to_scale = []
-        for i in data.columns:
-            # zmieniac tylko te ktore sa nieliczbowe
-            if isinstance(data[i].iloc[0], (np.float64, np.int64)):
-                columns_to_scale.append(i)
+    #### DATA SCALING ####
+    # robione to jest w tym miejscu bo wspolnie encodery nie pokrywaja danych ktore beda skalowane
+    scaler = StandardScaler()
+    columns_to_scale = []
+    for i in data.columns:
+        # zmieniac tylko te ktore sa nieliczbowe
+        if isinstance(data[i].iloc[0], (np.float64, np.int64)):
+            columns_to_scale.append(i)
 
-        columns_to_scale.remove("HeartDisease")
-        data[columns_to_scale] = scaler.fit_transform(data[columns_to_scale])
+    columns_to_scale.remove("HeartDisease")
+    data[columns_to_scale] = scaler.fit_transform(data[columns_to_scale])
 
-        #### DATA ENCODING ####
-        data_to_encode = []#wyodrebnienie danych do enkodowania
-        for i in data.columns:
-            # zmieniac tylko te ktore sa nieliczbowe
-            if not isinstance(data[i].iloc[0], (np.float64, np.int64)):
-                data_to_encode.append(i)
+    #### DATA ENCODING ####
+    data_to_encode = []  # wyodrebnienie danych do enkodowania
+    for i in data.columns:
+        # zmieniac tylko te ktore sa nieliczbowe
+        if not isinstance(data[i].iloc[0], (np.float64, np.int64)):
+            data_to_encode.append(i)
 
+    #### LABEL_ENCODER #####
+    label_encoders = {}  # Kazda cecha musi miec swoj encoder
+    data_label_encoder = data.copy()  ## bez copy robi sie tylko referencja
 
-        #### LABEL_ENCODER #####
-        label_encoders = {} #Kazda cecha musi miec swoj encoder
-        data_label_encoder = data.copy() ## bez copy robi sie tylko referencja
+    for i in data_to_encode:
+        label_encoders[i] = LabelEncoder()
+        data_label_encoder[i] = label_encoders[i].fit_transform(data_label_encoder[i])
 
-        for i in data_to_encode:
-                label_encoders[i] = LabelEncoder()
-                data_label_encoder[i] = label_encoders[i].fit_transform(data_label_encoder[i])
+    #### ONE_HOT ENCODER####
+    # Sposob dzialania - bierze kolumny nienumeryczne i rozbija je na podcechy
 
-        #### ONE_HOT ENCODER####
-        #Sposob dzialania - bierze kolumny nienumeryczne i rozbija je na podcechy
+    one_hot_encoder = OneHotEncoder(sparse_output=False)
+    encoded_data = one_hot_encoder.fit_transform(data[data_to_encode])  # cechy -> podcechy
 
-        one_hot_encoder = OneHotEncoder(sparse_output=False)
-        encoded_data = one_hot_encoder.fit_transform(data[data_to_encode]) #cechy -> podcechy
+    # Pobranie nazw nowych kolumn
+    encoded_columns = one_hot_encoder.get_feature_names_out(data_to_encode)
 
-        #Pobranie nazw nowych kolumn
-        encoded_columns = one_hot_encoder.get_feature_names_out(data_to_encode)
+    # połączenie cech i kolumn
+    data_one_hot_encoder = pd.DataFrame(encoded_data, columns=encoded_columns, index=data.index)
 
-        # połączenie cech i kolumn
-        data_one_hot_encoder = pd.DataFrame(encoded_data, columns=encoded_columns, index=data.index)
+    # odfiltrowanie kolumn numerycznych z oryginału
+    numerical_columns = [col for col in data.columns if col not in data_to_encode]
 
-        # odfiltrowanie kolumn numerycznych z oryginału
-        numerical_columns = [col for col in data.columns if col not in data_to_encode]
+    # Połączenie danych
+    data_one_hot_encoder = pd.concat([data[numerical_columns], data_one_hot_encoder], axis=1)
 
-        # Połączenie danych
-        data_one_hot_encoder = pd.concat([data[numerical_columns], data_one_hot_encoder], axis=1)
+    #### ZAPIS DO PLIKU ####
 
-        #### ZAPIS DO PLIKU ####
+    # label_encoder
+    joblib.dump(label_encoders, "./LABEL_ENCODER/label_encoders.pkl")
+    data_label_encoder.to_csv("./LABEL_ENCODER/heart_LABEL_ENCODER.csv", index=False)
 
-        # label_encoder
-        joblib.dump(label_encoders,"./LABEL_ENCODER/label_encoders.pkl")
-        data_label_encoder.to_csv("./LABEL_ENCODER/heart_LABEL_ENCODER.csv", index=False)
-
-        # one_hot_encoder
-        joblib.dump(one_hot_encoder,"./ONE_HOT_ENCODER/one_hot_encoder.pkl")
-        data_one_hot_encoder.to_csv("./ONE_HOT_ENCODER/heart_ONE_HOT_ENCODER.csv", index=False)
-
-    else:
-        #plik sie nie zmienil - zwroc odpowieni
-        pass
+    # one_hot_encoder
+    joblib.dump(one_hot_encoder, "./ONE_HOT_ENCODER/one_hot_encoder.pkl")
+    data_one_hot_encoder.to_csv("./ONE_HOT_ENCODER/heart_ONE_HOT_ENCODER.csv", index=False)
 
 
+def get_data(encoder: EncoderEnum, force_reload: bool = False) -> pd.DataFrame:
+    # Jeśli plik się zmienił lub wymuszono ponowne przetworzenie
+    if if_file_changed("heart.csv") or force_reload:
+        generate_data() #funkcja zapisuje dane do plikow
 
-get_data(encoder=EncoderEnum.LABEL_ENCODER, force_reload=True)
+    # Wczytaj odpowiednie dane w zależności od enkodera
+    if encoder == EncoderEnum.LABEL_ENCODER:
+        if os.path.exists("./LABEL_ENCODER/heart_LABEL_ENCODER.csv"):
+            return pd.read_csv("./LABEL_ENCODER/heart_LABEL_ENCODER.csv")
+        else:
+            raise FileNotFoundError("Plik heart_LABEL_ENCODER.csv nie istnieje. Ustaw force_reload=True, aby przetworzyć dane od nowa.")
+    else:  # ONE_HOT_ENCODER
+        if os.path.exists("./ONE_HOT_ENCODER/heart_ONE_HOT_ENCODER.csv"):
+            return pd.read_csv("./ONE_HOT_ENCODER/heart_ONE_HOT_ENCODER.csv")
+        else:
+            raise FileNotFoundError("Plik heart_ONE_HOT_ENCODER.csv nie istnieje. Ustaw force_reload=True, aby przetworzyć dane od nowa.")
+
+
+test= get_data(encoder=EncoderEnum.LABEL_ENCODER, force_reload=True)
+print(test.describe())
