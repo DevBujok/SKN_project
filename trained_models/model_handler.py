@@ -4,6 +4,8 @@
 import json, joblib, os, shutil
 from pathlib import Path
 
+from data_handler.get_data import EncoderEnum
+
 #sciezki robione jako absolutne bo na roznych systemach roznie te sciezki sie wywoluja
 modelsFolder = Path(__file__).resolve().parent
 modelsInfoURL = modelsFolder / "models.json"
@@ -49,7 +51,7 @@ class ModelHandler:
         with open(modelsInfoURL, 'w') as f:
             json.dump(filtered, f, indent=2) #nadpisanie calego pliku
 
-    def _add_to_the_json(self, modelName, modelPath, metrics):
+    def _add_to_the_json(self, modelName, modelPath, metrics, encoder_name: EncoderEnum):
         """
         Prywatna metoda do dodawania modelu do jsona
         :param modelName:
@@ -65,16 +67,18 @@ class ModelHandler:
 
         models.append({ #dodanie zaktualizowanego modelu
             "name": modelName,
-            "metrics": metrics
+            "metrics": metrics,
+            "encoder_name": encoder_name.name
         })
 
         with open(modelsInfoURL, 'w') as f: #wgranie do pliku nowego
             json.dump(models, f, indent=2)
         print("Zapisano do pliku.")
 
-    def add_model(self, model, model_name,metrics):
+    def add_model(self, model, model_name,metrics, encoder_name: EncoderEnum):
         """
         Metoda do dodania modelu
+        :param encoder_name:
         :param model:
         :param model_name:
         :param metrics:
@@ -82,7 +86,7 @@ class ModelHandler:
         """
         #dodanie do jsona
         model_path = modelsFolder  #sciezka do nowego modelu
-        self._add_to_the_json(model_name, model_path, metrics) #dodanie info do jsona
+        self._add_to_the_json(model_name, model_path, metrics, encoder_name) #dodanie info do jsona
 
         #zapisz model
         os.makedirs(model_path, exist_ok=True) #wywolanie tego zapewnia ze folder istnieje

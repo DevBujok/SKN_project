@@ -4,7 +4,10 @@ from sklearn.tree import DecisionTreeClassifier, export_text
 from data_handler.get_data import EncoderEnum, get_data
 from trained_models.model_handler import ModelHandler
 
-data, encoder = get_data(encoder=EncoderEnum.ONE_HOT_ENCODER, force_reload=True)
+chosen_encoder = EncoderEnum.ONE_HOT_ENCODER
+
+
+data, encoder = get_data(encoder=chosen_encoder, force_reload=True)
 
 X = data.drop(['HeartDisease'], axis=1)
 Y = data['HeartDisease']
@@ -22,4 +25,4 @@ print(rules)
 
 modelHandler = ModelHandler()
 
-modelHandler.add_model(model, "decision_tree", metrics)
+modelHandler.add_model(model, "decision_tree", metrics, chosen_encoder)
