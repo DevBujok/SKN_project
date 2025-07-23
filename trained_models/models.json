@@ -1,33 +1,34 @@
 [
   {
     "name": "decision_tree",
+    "encoder_name": "ONE_HOT_ENCODER",
+    "model_path": "D:\\Users\\devbu\\Desktop\\Projekty\\Python\\SKN_project\\trained_models",
     "metrics": {
       "0": {
-        "precision": 0.7808219178082192,
-        "recall": 0.7402597402597403,
-        "f1-score": 0.76,
-        "support": 77.0
+        "precision": 0.8472222222222222,
+        "recall": 0.7439024390243902,
+        "f1-score": 0.7922077922077922,
+        "support": 82.0
       },
       "1": {
-        "precision": 0.8198198198198198,
-        "recall": 0.8504672897196262,
-        "f1-score": 0.8348623853211009,
-        "support": 107.0
+        "precision": 0.8125,
+        "recall": 0.8921568627450981,
+        "f1-score": 0.8504672897196262,
+        "support": 102.0
       },
-      "accuracy": 0.8043478260869565,
+      "accuracy": 0.8260869565217391,
       "macro avg": {
-        "precision": 0.8003208688140195,
-        "recall": 0.7953635149896832,
-        "f1-score": 0.7974311926605504,
+        "precision": 0.8298611111111112,
+        "recall": 0.8180296508847442,
+        "f1-score": 0.8213375409637091,
         "support": 184.0
       },
       "weighted avg": {
-        "precision": 0.8035000456084435,
-        "recall": 0.8043478260869565,
-        "f1-score": 0.8035341045073794,
+        "precision": 0.8279740338164252,
+        "recall": 0.8260869565217391,
+        "f1-score": 0.8245038180023958,
         "support": 184.0
       }
-    },
-    "encoder_name": "ONE_HOT_ENCODER"
+    }
   }
 ]

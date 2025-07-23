@@ -6,7 +6,6 @@ from trained_models.model_handler import ModelHandler
 
 chosen_encoder = EncoderEnum.ONE_HOT_ENCODER
 
-
 data, encoder = get_data(encoder=chosen_encoder, force_reload=True)
 
 X = data.drop(['HeartDisease'], axis=1)
@@ -19,8 +18,9 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 metrics = classification_report(y_test, y_pred, output_dict=True)
 
-print(metrics)
 rules = export_text(model, feature_names=list(X_train.columns))
+
+print(metrics)
 print(rules)
 
 modelHandler = ModelHandler()

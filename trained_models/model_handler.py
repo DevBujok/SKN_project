@@ -1,7 +1,9 @@
 #Klasa pomocnicza do zapisywania modeli
 #przyjmuje: nazwa modelu, model
 #działanie - na podstawie przesłanych danych tworzy folder i dodaje tam pkl i dane o wytrenowanym modelu do jsona
-import json, joblib, os, shutil
+## na przyszłość: przepisać na statyczną klase
+
+import json, joblib, os
 from pathlib import Path
 
 from data_handler.get_data import EncoderEnum
@@ -51,24 +53,25 @@ class ModelHandler:
         with open(modelsInfoURL, 'w') as f:
             json.dump(filtered, f, indent=2) #nadpisanie calego pliku
 
-    def _add_to_the_json(self, modelName, modelPath, metrics, encoder_name: EncoderEnum):
+    def _add_to_the_json(self, model_name, model_path, metrics, encoder_name: EncoderEnum):
         """
         Prywatna metoda do dodawania modelu do jsona
-        :param modelName:
-        :param modelPath:
+        :param model_name:
+        :param model_path:
         :param metrics:
         :return:
         """
         models = self._get_models_from_json()
-        if self._model_exists(modelName): #jezeli model istnieje: usuniecie starego
+        if self._model_exists(model_name): #jezeli model istnieje: usuniecie starego
             print("Model istnieje. Nadpisywanie...")
-            self.delete_model(modelName)
+            self.delete_model(model_name)
             models = self._get_models_from_json()  # trzeba ponownie wczytac bo jest stara lista w tym momencie
 
         models.append({ #dodanie zaktualizowanego modelu
-            "name": modelName,
-            "metrics": metrics,
-            "encoder_name": encoder_name.name
+            "name": model_name,
+            "encoder_name": encoder_name.name,
+            "model_path": str(model_path),
+            "metrics": metrics
         })
 
         with open(modelsInfoURL, 'w') as f: #wgranie do pliku nowego
