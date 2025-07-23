@@ -50,4 +50,4 @@ metrics = classification_report(y_test, y_pred, output_dict=True)
 
 modelHandler = ModelHandler()
 
-modelHandler.add_model(model, "random_forest", metrics, labelEncoder)
+modelHandler.add_model(model, "random_forest", metrics)

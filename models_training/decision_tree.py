@@ -16,10 +16,10 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 metrics = classification_report(y_test, y_pred, output_dict=True)
 
-
+print(metrics)
 rules = export_text(model, feature_names=list(X_train.columns))
 print(rules)
 
 modelHandler = ModelHandler()
 
-modelHandler.add_model(model, "decision_tree", metrics, encoder)
+modelHandler.add_model(model, "decision_tree", metrics)

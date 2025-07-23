@@ -36,4 +36,4 @@ metrics = classification_report(y_test, y_pred, output_dict=True)
 
 modelHandler = ModelHandler()
 
-modelHandler.add_model(model, "naive_bayes_prescaler", metrics, labelEncoder)
+modelHandler.add_model(model, "naive_bayes_prescaler", metrics)

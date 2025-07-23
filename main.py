@@ -60,5 +60,5 @@ metrics = classification_report(y_test, y_pred, output_dict=True)
 
 modelHandler = ModelHandler()
 
-modelHandler.add_model(model, "logistic_regression_prescaler", metrics, labelEncoder)
+modelHandler.add_model(model, "logistic_regression_prescaler", metrics)
 # modelHandler.delete_model("logistic_regression")

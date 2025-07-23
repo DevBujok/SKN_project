@@ -38,4 +38,4 @@ metrics = classification_report(y_test, y_pred, output_dict=True)
 
 modelHandler = ModelHandler()
 
-modelHandler.add_model(model, "knn_5", metrics, labelEncoder, scaler)
+modelHandler.add_model(model, "knn_5", metrics)

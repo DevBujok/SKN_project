@@ -72,39 +72,22 @@ class ModelHandler:
             json.dump(models, f, indent=2)
         print("Zapisano do pliku.")
 
-    def add_model(self, model, modelName,metrics, labelEncoder, prescaler = None):
+    def add_model(self, model, model_name,metrics):
         """
         Metoda do dodania modelu
         :param model:
-        :param modelName:
+        :param model_name:
         :param metrics:
         :return:
         """
         #dodanie do jsona
-        model_path = modelsFolder / f"{modelName}" #sciezka do nowego modelu
-        self._add_to_the_json(modelName, model_path, metrics) #dodanie info do jsona
+        model_path = modelsFolder  #sciezka do nowego modelu
+        self._add_to_the_json(model_name, model_path, metrics) #dodanie info do jsona
 
         #zapisz model
         os.makedirs(model_path, exist_ok=True) #wywolanie tego zapewnia ze folder istnieje
-        joblib.dump(model, model_path / f"{modelName}.pkl") #dump modelu
-        joblib.dump(labelEncoder, model_path / f"{modelName}_label_encoder.pkl")
-        if prescaler is not None:
-            joblib.dump(prescaler, model_path/ f"{modelName}_prescaler.pkl")
+        joblib.dump(model, model_path / f"{model_name}.pkl") #dump modelu
 
-    @staticmethod
-    def _delete_folder(modelName):
-        """
-        Prywatna statyczna metoda do usuniecia istniejacego folderu
-        :param modelName:
-        :return:
-        """
-        path_to_delete = modelsFolder / f"{modelName}" #sciezka do usuniecia
-
-        if path_to_delete.resolve().is_relative_to(modelsFolder.resolve()): #dodatkowe sprawdzenie czy sciezka znajduje sie w katalogu domowym,
-            # bo ona moze usuwac wszystko globalnie
-            shutil.rmtree(path_to_delete, ignore_errors=True) #usuniecie
-        else:
-            raise PermissionError("Ścieżka poza dozwolonym katalogiem")
 
     def delete_model(self, modelName):
         """
@@ -114,7 +97,6 @@ class ModelHandler:
         """
         if self._model_exists(modelName): #sprawdzenie czy model istnieje
             self._delete_from_json(modelName) #usuniecie z jsona
-            self._delete_folder(modelName) #usuniecie folderu
         else:
             print("Model o podanej nazwie nie istnieje.")
         pass
